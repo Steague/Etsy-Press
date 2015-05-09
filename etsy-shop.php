@@ -38,7 +38,7 @@ Version: 0.15
  * TODO: Add MCE Button
  */
 
-define( 'ETSY_SHOP_VERSION',  '0.15.1');
+define( 'ETSY_SHOP_VERSION',  '0.15.2');
 define( 'ETSY_SHOP_CACHE_LIFE',  21600 ); // 6 hours in seconds
 
 // load translation
