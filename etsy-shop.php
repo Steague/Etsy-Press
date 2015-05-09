@@ -121,19 +121,66 @@ function etsy_shop_post( $the_content ) {
 }
 /* === END: Used for backward-compatibility 0.x versions === */
 
-function etsy_shop_process( $shop_id, $section_id, $show_available_tag = true, $language = null ) {
-    // Filter Shop ID and Section ID
-    $shop_id = preg_replace( '/[^a-zA-Z0-9,]/', '', $shop_id );
+function etsy_shop_process() {
+
+    $numargs = func_num_args();
+    switch ($numargs) {
+        //support for legacy plugin
+        case (2):
+            $shop_id            = func_get_arg(0);
+            $section_id         = func_get_arg(1);
+            $listing_id         = null;
+            $show_available_tag = true;
+            $language           = null;
+            $thumb_size         = "medium";
+            $width              = "172px";
+            $height             = "135px";
+            break;
+        case (1):
+            $attributes         = func_get_arg(0);
+            $shop_id            = $attributes['shop_name'];
+            $section_id         = $attributes['section_id'];
+            $listing_id         = $attributes['listing_id'];
+            $show_available_tag = (!$attributes['show_available_tag'] ? true : $attributes['show_available_tag']);
+            $language           = (!$attributes['language'] ? null : $attributes['language']);
+            $thumb_size         = (!$attributes['thumb_size'] ? "medium" : $attributes['thumb_size']);
+            $width              = (!$attributes['width'] ? "172px" : $attributes['width']);;
+            $height             = (!$attributes['height'] ? "135px" : $attributes['height']);;
+            break;
+        default:
+            return "Etsy Shop: invalid number of arguments";
+    }
+
+    // Filter the values
+    $shop_id    = preg_replace( '/[^a-zA-Z0-9,]/', '', $shop_id );
     $section_id = preg_replace( '/[^a-zA-Z0-9,]/', '', $section_id );
+    $listing_id = preg_replace( '/[^a-zA-Z0-9,]/', '', $listing_id );
+
+    //Filter the thumb size
+    switch ($thumb_size) {
+        case ("small"):
+            $thumb_size = "url_75x75";
+            break;
+        case ("large"):
+            $thumb_size = "url_570xN";
+            break;
+        case ("original"):
+            $thumb_size = "url_fullxfull";
+            break;
+        case ("medium"):
+        default:
+            $thumb_size = "url_170x135";
+            break;
+    }
     
     // Filter Language
     if ( strlen($language) != 2 ) {
         $language = null;
     }
 
-    if ( $shop_id != '' || $section_id != '' ) {
+    if ( $shop_id != '' && $section_id != '' ) {
         // generate listing for shop section
-        $listings = etsy_shop_getShopSectionListings( $shop_id, $section_id, $language );
+        $listings = etsy_shop_getShopSectionListings( $shop_id, $section_id, $language);
         if ( !get_option( 'etsy_shop_debug_mode' ) ) {
             if ( !is_wp_error( $listings ) ) {
                $data = '<table class="etsy-shop-listing-table"><tr>';
@@ -147,15 +194,31 @@ function etsy_shop_process( $shop_id, $section_id, $show_available_tag = true, $
                }
 
                foreach ( $listings->results as $result ) {
-                   $listing_html = etsy_shop_generateListing( $result->listing_id, $result->title, $result->state, $result->price, $result->currency_code, $result->quantity, $result->url, $result->Images[0]->url_170x135, $target, $show_available_tag );
-                   if ( $listing_html !== false ) {
-                       $data = $data.'<td class="etsy-shop-listing">'.$listing_html.'</td>';
-                       $n++;
-                       if ( $n % ( !get_option( 'etsy_shop_column_count' ) ? 4 : get_option( 'etsy_shop_column_count' ) ) == 0 ) {
-                           $data = $data.'</tr><tr>';
-                           //$n = 1;
-                       }
-                   }
+
+                    if (!empty($listing_id) && $result->listing_id != $listing_id) {
+                        continue;
+                    }
+                    $listing_html = etsy_shop_generateListing(
+                        $result->listing_id,
+                        $result->title,
+                        $result->state,
+                        $result->price,
+                        $result->currency_code,
+                        $result->quantity,
+                        $result->url,
+                        $result->Images[0]->$thumb_size,
+                        $target,
+                        $show_available_tag,
+                        $width,
+                        $height
+                    );
+                    if ( $listing_html !== false ) {
+                        $data = $data.'<td class="etsy-shop-listing">'.$listing_html.'</td>';
+                        $n++;
+                        if ( $n % ( !get_option( 'etsy_shop_column_count' ) ? 4 : get_option( 'etsy_shop_column_count' ) ) == 0 ) {
+                            $data = $data.'</tr><tr>';
+                        }
+                    }
                 }
                 $data = $data.'</tr></table>';
             } else {
@@ -178,13 +241,17 @@ function etsy_shop_shortcode( $atts ) {
     // if API Key exist
     if ( get_option( 'etsy_shop_api_key' ) ) {
         $attributes = shortcode_atts( array(
-            'shop_name' => null,
-            'section_id' => null,
-            'language' => null,
+            'shop_name'          => null,
+            'section_id'         => null,
+            'listing_id'         => null,
+            'thumb_size'         => null,
+            'language'           => null,
             'show_available_tag' => true,
+            'width'              => "172px",
+            'height'             => "135px"
         ), $atts );
 
-        $content = etsy_shop_process( $attributes['shop_name'], $attributes['section_id'], $attributes['show_available_tag'], $attributes['language'] );
+        $content = etsy_shop_process( $attributes );
         return $content;
     } else {
         // no API Key set, return the content
@@ -288,7 +355,7 @@ function etsy_shop_api_request( $etsy_request, $args = NULL, $noDebug = NULL ) {
     return $request_body;
 }
 
-function etsy_shop_generateListing($listing_id, $title, $state, $price, $currency_code, $quantity, $url, $url_170x135, $target, $show_available_tag) {
+function etsy_shop_generateListing($listing_id, $title, $state, $price, $currency_code, $quantity, $url, $imgurl, $target, $show_available_tag, $width = "172px", $height = "135px") {
     if ( strlen( $title ) > 18 ) {
         $title = substr( $title, 0, 25 );
         $title .= "...";
@@ -313,9 +380,9 @@ function etsy_shop_generateListing($listing_id, $title, $state, $price, $currenc
         }
 
         $script_tags =  '
-            <div class="etsy-shop-listing-card" id="' . $listing_id . '" style="text-align: center;">
+            <div class="etsy-shop-listing-card" id="' . $listing_id . '" style="width:' . $width . '">
                 <a title="' . $title . '" href="' . $url . '" target="' . $target . '" class="etsy-shop-listing-thumb">
-                    <img alt="' . $title . '" src="' . $url_170x135 . '">          
+                    <div class="etsy-shop-image-cropped" style="background-image:url(' . $imgurl . ');height:' . $height . '"></div>
                 </a>
                 <div class="etsy-shop-listing-detail">
                     <p class="etsy-shop-listing-title">
