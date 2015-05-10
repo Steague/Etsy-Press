@@ -1,12 +1,13 @@
-.etsy-shop-listing-table {
+.etsy-press-listing-table {
     border: 0px !important;
 }
 
-td.etsy-shop-listing {
+td.etsy-press-listing {
     border: 0px !important;
+    padding: 0 !important;
 }
 
-.etsy-shop-image-cropped {
+.etsy-press-image-cropped {
     background-size: cover;
     background-repeat: no-repeat;
     background-position: 50% 50%;
@@ -14,7 +15,7 @@ td.etsy-shop-listing {
     height: 135px;
 }
 
-.etsy-shop-listing-card {
+.etsy-press-listing-card {
     background-color: white;
     border: 1px solid #EAEAEA;
     display: block;
@@ -29,27 +30,28 @@ td.etsy-shop-listing {
     margin: 0 auto;
 }
 
-.etsy-shop-listing {
+.etsy-press-listing {
     border-top: 0;
+    padding: 0 !important;
 }
 
 
-.etsy-shop-listing-thumb {
+.etsy-press-listing-thumb {
     display: block;
 }
 
-.etsy-shop-listing-thumb img {
+.etsy-press-listing-thumb img {
     margin: 0; 
     padding: 0;
 }
 
-.etsy-shop-listing-detail {
+.etsy-press-listing-detail {
     margin: 0; 
     padding: 0; 
     text-align: left;
 }
 
-.etsy-shop-listing-title {
+.etsy-press-listing-title {
     height: 15px; 
     line-height: 15px !important; 
     margin: 0; 
@@ -58,39 +60,39 @@ td.etsy-shop-listing {
     overflow: hidden;
 }
 
-.etsy-shop-listing-title a {
+.etsy-press-listing-title a {
     color: #666; 
     text-decoration: none;
 }
 
-.etsy-shop-listing-title a:hover{
+.etsy-press-listing-title a:hover{
     text-decoration: underline;
 }
 
-.etsy-shop-listing-maker {
+.etsy-press-listing-maker {
     line-height: 14px !important; 
     margin: 0; 
     padding: 0;
 }
 
-.etsy-shop-listing-maker a {
+.etsy-press-listing-maker a {
     color: #B2B2B2; 
     text-decoration: none; 
     padding: 0; 
     margin: 0;
 }
 
-.etsy-shop-listing-maker a:hover{
+.etsy-press-listing-maker a:hover{
     text-decoration: underline;
 }
 
-.etsy-shop-listing-price {
+.etsy-press-listing-price {
     color: #78C042; 
     float: right; 
     line-height: 14px !important;
     margin-top: -14px;
 }
 
-.etsy-shop-currency-code {
+.etsy-press-currency-code {
     font-size: 10px;
 }
