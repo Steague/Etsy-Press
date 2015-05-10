@@ -1,7 +1,10 @@
 #Etsy Press
 Tags: etsy, etsy listing, bracket, shortcode, shopping, shop, store, sell
+
 Stable tag: 0.1
+
 License: GPLv2 or later
+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 ##Description
@@ -21,13 +24,14 @@ Plugin that allow you to insert Etsy Shop sections in pages or posts using the b
 ##Frequently Asked Questions
 
 ###How may I find the shop section id?
-
 Here is an example:
 
 URL: http://www.etsy.com/shop/sushipot?section_id=11502395
 
 So, in this example:
+
 sushipot is **etsy-shop-name**
+
 11502395 is **etsy-shop-section-id**
 
 ###I got Etsy Shop: empty arguments
